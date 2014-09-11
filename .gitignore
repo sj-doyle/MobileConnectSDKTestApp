@@ -1,16 +1,26 @@
 # built application files
-*.apk
 *.ap_
 
 # files for the dex VM
 *.dex
 
+#temp edit files
+*.swp
+
 # Java class files
 *.class
 
 # generated files
-bin/
 gen/
+bin/*.d
+bin/AndroidManifest.xml
+bin/build.prop
+bin/dexedLibs
+bin/jarlist.cache
+bin/proguard.txt
+bin/res
+bin/*unaligned.apk
+
 
 # Local configuration file (sdk path, etc)
 local.properties

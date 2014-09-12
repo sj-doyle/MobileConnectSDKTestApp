@@ -10,11 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import android.util.Log;
-
-import com.gsma.android.xoperatorapidemo.discovery.DiscoveryData;
-import com.gsma.android.xoperatorapidemo.discovery.Link;
-
 /**
  * simple utilities which help with processing of JSON data
  */
@@ -119,37 +114,6 @@ public class JsonUtils {
 		return container;
 	}
 	
-	public static DiscoveryData readDiscoveryData(String strval) throws JSONException {
-		DiscoveryData response=null;
-		
-		JSONObject json=new JSONObject(strval);
-		response=new DiscoveryData(json);
-		
-		return response;
-	}
-	
-	public static DiscoveryData readDiscoveryData(InputStream is) throws IOException, JSONException { 
-		DiscoveryData response=null;
-		StringBuffer buf=new StringBuffer();
-
-		if (is!=null) {
-			final Reader in = new InputStreamReader(is, "UTF-8");
-			
-			char[] b=new char[1024];
-			int n;
-			while ((n=in.read(b)) != -1) {
-				buf.append(b, 0, n);
-			}
-			
-			in.close();
-			
-			Log.d(TAG, "Parsing "+buf.toString());
-			
-			response=readDiscoveryData(buf.toString());
-		}
-		
-		return response;
-	}
 
 	public static String readString(InputStream is) throws IOException, JSONException { 
 		StringBuffer buf=new StringBuffer();
@@ -169,16 +133,4 @@ public class JsonUtils {
 		return buf.toString();
 	}
 	
-	public static String getLinkArrayHref(Link[] link, String rel) {
-		String href=null;
-        if (link!=null && link.length>0 && rel!=null) {
-        	for (int i=0; i<link.length && href==null; i++) {
-        		if (rel.equalsIgnoreCase(link[i].getRel())) {
-        			href=link[i].getHref();
-        		}
-        	}
-        }
-        return href;
-	}
-
 }

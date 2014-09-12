@@ -3,9 +3,9 @@ package com.gsma.android.xoperatorapidemo.activity;
 import java.io.IOException;
 
 import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
@@ -30,28 +30,27 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gsma.android.mobileconnectsdktest.R;
+import com.gsma.android.oneapi.discovery.Api;
+import com.gsma.android.oneapi.discovery.DiscoveryItem;
+import com.gsma.android.oneapi.discovery.DiscoveryListener;
 import com.gsma.android.oneapi.discovery.DiscoveryProvider;
+import com.gsma.android.oneapi.discovery.DiscoveryResponse;
 import com.gsma.android.oneapi.valuesDiscovery.DiscoveryCredentials;
-import com.gsma.android.xoperatorapidemo.activity.discovery.ActiveDiscoveryTask;
-import com.gsma.android.xoperatorapidemo.activity.discovery.PassiveDiscoveryTask;
 import com.gsma.android.xoperatorapidemo.activity.identity.DisplayIdentityWebsiteActivity;
-import com.gsma.android.xoperatorapidemo.discovery.Api;
-import com.gsma.android.xoperatorapidemo.discovery.DiscoveryData;
 import com.gsma.android.xoperatorapidemo.discovery.DiscoveryStartupSettings;
-import com.gsma.android.xoperatorapidemo.discovery.Response;
 import com.gsma.android.xoperatorapidemo.logo.LogoCache;
 import com.gsma.android.xoperatorapidemo.logo.LogoLoaderTask;
 import com.gsma.android.xoperatorapidemo.utils.PhoneState;
 import com.gsma.android.xoperatorapidemo.utils.PhoneUtils;
 import com.gsma.android.xoperatorapidemo.utils.PreferencesUtils;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements DiscoveryListener {
 
 	private static final String TAG = "MainActivity";
 
 	public static MainActivity mainActivityInstance = null;
 		
-	private static DiscoveryData discoveryData=null;	
+	private static DiscoveryItem discoveryData=null;	
 	
 	public static final int DISCOVERY_COMPLETE=1;
 	public static final int SETTINGS_COMPLETE=2;
@@ -77,9 +76,6 @@ public class MainActivity extends Activity {
 	static Handler discoveryHandler = null;
 	static Handler logoUpdateHandler = null;
 	
-	PassiveDiscoveryTask passiveDiscoveryTask = null;
-	ActiveDiscoveryTask initialDiscoveryTask = null;
-
 	/*
 	 * method called when the application first starts.
 	 */
@@ -126,7 +122,7 @@ public class MainActivity extends Activity {
 				Log.d(TAG, "Discovery result processing. "+msg.what);
 				
 				vDiscoveryStatus.setText(getString(msg.what));
-				setButtonStates((DiscoveryData) msg.obj);
+				setButtonStates((DiscoveryItem) msg.obj);
 				discoveryButton.setEnabled(true);
 			}
 		};
@@ -302,14 +298,38 @@ public class MainActivity extends Activity {
 					
 					discoveryProvider.clearCacheDiscoveryItem(this);
 					
-					discoveryProvider.getDiscoveryPassive(SettingsActivity.getDeveloperOperator().getEndpoint(), 
-							SettingsActivity.getDeveloperOperator().getAppKey(), 
-							SettingsActivity.getDeveloperOperator().getAppSecret(), 
-							SettingsActivity.getServingOperator().getIpaddress(), 
-							listener, 
-							this, 
-							DiscoveryCredentials.PLAIN, 
-							"http://gsma.com/oneapi");
+					if (SettingsActivity.getServingOperator().isAutomatic()) {
+						discoveryProvider.getDiscoveryPassiveAutomaticMCCMNC(SettingsActivity.getDeveloperOperator().getEndpoint(), 
+								SettingsActivity.getDeveloperOperator().getAppKey(), 
+								SettingsActivity.getDeveloperOperator().getAppSecret(), 
+								SettingsActivity.getServingOperator().getIpaddress(), 
+								null, /* MSISDN */
+								listener, 
+								this, 
+								DiscoveryCredentials.PLAIN, 
+								"http://gsma.com/oneapi");
+
+						//TODO - no MSISDN parameter
+						
+					} else {
+						discoveryProvider.getDiscoveryPassive(SettingsActivity.getDeveloperOperator().getEndpoint(), 
+								SettingsActivity.getDeveloperOperator().getAppKey(), 
+								SettingsActivity.getDeveloperOperator().getAppSecret(), 
+								SettingsActivity.getServingOperator().getIpaddress(),
+								SettingsActivity.getServingOperator().getMcc(),
+								SettingsActivity.getServingOperator().getMnc(),
+								null, /* MSISDN */
+								listener, 
+								this, 
+								DiscoveryCredentials.PLAIN, 
+								"http://gsma.com/oneapi");
+						
+						/*
+						 * getDiscoveryPassive(String serviceUri, String consumerKey,
+			String consumerSecret, String sourceIP, String mcc, String mnc, String msisdn, DiscoveryListener listener,
+			Context context, DiscoveryCredentials credentials, String redirectUri
+						 */
+					}
 					
 //					passiveDiscoveryTask =
 //							new PassiveDiscoveryTask(mainActivityInstance, 
@@ -332,14 +352,30 @@ public class MainActivity extends Activity {
 					
 					discoveryProvider.clearCacheDiscoveryItem(this);
 					
-					discoveryProvider.getDiscoveryActive(SettingsActivity.getDeveloperOperator().getEndpoint(), 
-							SettingsActivity.getDeveloperOperator().getAppKey(), 
-							SettingsActivity.getDeveloperOperator().getAppSecret(), 
-							SettingsActivity.getServingOperator().getIpaddress(), 
-							listener, 
-							this, 
-							DiscoveryCredentials.PLAIN, 
-							"http://gsma.com/oneapi", true);
+					if (SettingsActivity.getServingOperator().isAutomatic()) {
+						discoveryProvider.getDiscoveryActiveAutomaticMCCMNC(SettingsActivity.getDeveloperOperator().getEndpoint(), 
+								SettingsActivity.getDeveloperOperator().getAppKey(), 
+								SettingsActivity.getDeveloperOperator().getAppSecret(), 
+								SettingsActivity.getServingOperator().getIpaddress(), 
+								null, /* MSISDN */
+								listener, 
+								this, 
+								DiscoveryCredentials.PLAIN, 
+								"http://gsma.com/oneapi");
+						//TODO - missing MSISDN parameter
+					} else {
+						discoveryProvider.getDiscoveryActive(SettingsActivity.getDeveloperOperator().getEndpoint(), 
+								SettingsActivity.getDeveloperOperator().getAppKey(), 
+								SettingsActivity.getDeveloperOperator().getAppSecret(), 
+								SettingsActivity.getServingOperator().getIpaddress(), 
+								SettingsActivity.getServingOperator().getMcc(),
+								SettingsActivity.getServingOperator().getMnc(),
+								null, /* MSISDN */
+								listener, 
+								this, 
+								DiscoveryCredentials.PLAIN, 
+								"http://gsma.com/oneapi");						
+					}
 
 //					initialDiscoveryTask = 
 //						new ActiveDiscoveryTask(mainActivityInstance, 
@@ -379,13 +415,13 @@ public class MainActivity extends Activity {
 		return true;
 	}
 	
-	private void setButtonStates(DiscoveryData discoveryData) {
+	private void setButtonStates(DiscoveryItem discoveryData) {
 		Log.d(TAG, "Setting button states");
 		boolean operatorIdEnabled=false;
 		
 		Log.d(TAG, "discoveryData="+discoveryData);
 		if (discoveryData!=null && discoveryData.getResponse()!=null) {
-			Response resp=discoveryData.getResponse();
+			DiscoveryResponse resp=discoveryData.getResponse();
 			Api operatorId=resp.getApi("operatorid");
 			Log.d(TAG, "operatorid="+operatorId);
 			if (operatorId!=null) {
@@ -410,32 +446,32 @@ public class MainActivity extends Activity {
 	}
 
 	
-	public static void updateDiscoveryData(DiscoveryData discovered) {
-		Log.d(TAG, "Updating discovery data");
-		discoveryData=discovered;
-		justDiscovered=true;
-		Message msg=new Message();
-		msg.what=R.string.discoveryStatusCompleted;
-		msg.obj=discovered;
-		discoveryHandler.sendMessage(msg);
-		
-		try {
-			Editor editor=mPrefs.edit();
-			ObjectMapper mapper=new ObjectMapper();
-			String serialised = discovered!=null?mapper.writeValueAsString(discovered):null;
-			editor.putString("DiscoveryData", serialised);
-			Log.d(TAG, "Serialised as "+serialised);
-			editor.commit();
-		} catch (JsonGenerationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public static void updateDiscoveryData(DiscoveryItem discovered) {
+//		Log.d(TAG, "Updating discovery data");
+//		discoveryData=discovered;
+//		justDiscovered=true;
+//		Message msg=new Message();
+//		msg.what=R.string.discoveryStatusCompleted;
+//		msg.obj=discovered;
+//		discoveryHandler.sendMessage(msg);
+//		
+//		try {
+//			Editor editor=mPrefs.edit();
+//			ObjectMapper mapper=new ObjectMapper();
+//			String serialised = discovered!=null?mapper.writeValueAsString(discovered):null;
+//			editor.putString("DiscoveryData", serialised);
+//			Log.d(TAG, "Serialised as "+serialised);
+//			editor.commit();
+//		} catch (JsonGenerationException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (JsonMappingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	public static void clearDiscoveryData() {
@@ -451,7 +487,7 @@ public class MainActivity extends Activity {
 		editor.commit();
 	}
 
-	public static DiscoveryData getDiscoveryData() {
+	public static DiscoveryItem getDiscoveryData() {
 		return MainActivity.discoveryData;
 	}
 
@@ -495,14 +531,15 @@ public class MainActivity extends Activity {
 
 			discoveryButton.setEnabled(false);
 			vDiscoveryStatus.setText(getString(R.string.discoveryStatusStarted));
-			initialDiscoveryTask=
-				new ActiveDiscoveryTask(mainActivityInstance, 
-						SettingsActivity.getDeveloperOperator().getEndpoint(),
-						SettingsActivity.getDeveloperOperator().getAppKey(), 
-						SettingsActivity.getDeveloperOperator().getAppSecret(),
-						mcc, mnc, SettingsActivity.isCookiesSelected(), 
-						SettingsActivity.getServingOperator().getIpaddress());
-			initialDiscoveryTask.execute();
+			//TODO
+//			initialDiscoveryTask=
+//				new ActiveDiscoveryTask(mainActivityInstance, 
+//						SettingsActivity.getDeveloperOperator().getEndpoint(),
+//						SettingsActivity.getDeveloperOperator().getAppKey(), 
+//						SettingsActivity.getDeveloperOperator().getAppSecret(),
+//						mcc, mnc, SettingsActivity.isCookiesSelected(), 
+//						SettingsActivity.getServingOperator().getIpaddress());
+//			initialDiscoveryTask.execute();
 		}
 	}
 
@@ -533,13 +570,52 @@ public class MainActivity extends Activity {
 	}
 	
 	private void cancelOutstandingDiscoveryTasks() {
-		if (initialDiscoveryTask!=null) {
-			initialDiscoveryTask.cancel(true);
-			initialDiscoveryTask=null;
+	}
+	
+	@Override
+	public void discoveryInfo(DiscoveryItem di) {
+		// TODO Auto-generated method stub
+		Log.d(TAG, "received discoveryInfo");
+		if (di.getResponse()!=null) {
+			Log.d(TAG, "have response");
+			
+			Log.d(TAG, "Updating discovery data");
+			discoveryData=di;
+			justDiscovered=true;
+			Message msg=new Message();
+			msg.what=R.string.discoveryStatusCompleted;
+			msg.obj=discovered;
+			discoveryHandler.sendMessage(msg);
+			
+			try {
+				Editor editor=mPrefs.edit();
+				ObjectMapper mapper=new ObjectMapper();
+				String serialised = di!=null?mapper.writeValueAsString(di):null;
+				editor.putString("DiscoveryData", serialised);
+				Log.d(TAG, "Serialised as "+serialised);
+				editor.commit();
+			} catch (JsonGenerationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
-		if (passiveDiscoveryTask!=null) {
-			passiveDiscoveryTask.cancel(true);
-			passiveDiscoveryTask=null;
+		if (di.getError()!=null) {
+			Log.d(TAG, "have error");
 		}
 	}
+
+	@Override
+	public void errorDiscoveryInfo(JSONObject error) {
+		// TODO Auto-generated method stub
+		
+		Log.d(TAG, "received error");
+	}
+
 }

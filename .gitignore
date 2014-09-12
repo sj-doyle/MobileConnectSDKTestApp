@@ -56,3 +56,7 @@ proguard/
 assets/google.properties
 nexus
 xperia
+
+#misc
+.svn/
+discoverysrc/

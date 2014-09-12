@@ -14,6 +14,12 @@ public class DiscoveryProcessor implements DiscoveryListener {
 	public void discoveryInfo(DiscoveryItem di) {
 		// TODO Auto-generated method stub
 		Log.d(TAG, "received discoveryInfo");
+		if (di.getResponse()!=null) {
+			Log.d(TAG, "have response");
+		}
+		if (di.getError()!=null) {
+			Log.d(TAG, "have error");
+		}
 	}
 
 	@Override

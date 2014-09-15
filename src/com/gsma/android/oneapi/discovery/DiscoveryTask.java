@@ -25,9 +25,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.gsma.android.oneapi.utilsDiscovery.CookieManagement;
-import com.gsma.android.oneapi.utilsDiscovery.HttpUtils;
-import com.gsma.android.oneapi.utilsDiscovery.JsonUtils;
+import com.gsma.android.utils.CookieManagement;
+import com.gsma.android.utils.HttpUtils;
+import com.gsma.android.utils.JsonUtils;
 
 import android.content.Context;
 import android.content.Intent;
@@ -62,7 +62,6 @@ public class DiscoveryTask extends AsyncTask<Void, Void, JSONObject> {
 	 * @param serviceUri
 	 * @param consumerKey
 	 * @param consumerSecret
-	 * @param sourceIP
 	 * @param usingMobileData
 	 * @param msisdn
 	 * @param mcc
@@ -202,7 +201,7 @@ public class DiscoveryTask extends AsyncTask<Void, Void, JSONObject> {
 					HttpEntity httpEntity = httpResponse.getEntity();
 					InputStream is = httpEntity.getContent();
 					Log.d(TAG, "Converting discovery data OK (JSON)");
-					response = JsonUtils.readDiscoveryDataJSON(is);
+					response = JsonUtils.readJSON(is);
 
 				} else if (HttpUtils.isHTML(contentType)) {
 					Log.d(TAG,"Have OK HTML content - needs to be handled through the browser");
@@ -242,7 +241,7 @@ public class DiscoveryTask extends AsyncTask<Void, Void, JSONObject> {
 				
 				HttpEntity httpEntity = httpResponse.getEntity();
 				InputStream is = httpEntity.getContent();
-				JSONObject jo = JsonUtils.readDiscoveryDataJSON(is);
+				JSONObject jo = JsonUtils.readJSON(is);
 				Link[] link = null;
 				String href = "";
 				if (jo != null) {

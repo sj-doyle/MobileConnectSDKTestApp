@@ -19,7 +19,6 @@ import com.gsma.android.xoperatorapidemo.discovery.DiscoveryDeveloperOperatorSet
 import com.gsma.android.xoperatorapidemo.discovery.DiscoveryServingOperatorSettings;
 import com.gsma.android.xoperatorapidemo.discovery.DiscoveryStartupSettings;
 import com.gsma.android.xoperatorapidemo.discovery.ServingOperatorSetting;
-import com.gsma.android.xoperatorapidemo.logo.LogoCache;
 import com.gsma.android.xoperatorapidemo.utils.PhoneState;
 import com.gsma.android.xoperatorapidemo.utils.PhoneUtils;
 
@@ -250,7 +249,7 @@ public class SettingsActivity extends Activity {
 	
 	public void clearCache(View view) {
 		MainActivity.clearDiscoveryData();
-		LogoCache.clearCache();
+//		LogoCache.clearCache();
 		MainActivity.processLogoUpdates();
 	}
 	

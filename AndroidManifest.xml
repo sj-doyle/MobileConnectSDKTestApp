@@ -33,9 +33,7 @@
         <activity android:name="com.gsma.android.xoperatorapidemo.activity.DemoActivity"/>
         <activity android:name="com.gsma.android.xoperatorapidemo.activity.SettingsActivity"/>
 
-        <activity android:name="com.gsma.android.xoperatorapidemo.activity.identity.DisplayIdentityWebsiteActivity"/>
-        <activity android:name="com.gsma.android.xoperatorapidemo.activity.identity.AuthorizationCompleteActivity"/>
-        
+        <activity android:name="com.gsma.android.xoperatorapidemo.activity.AuthorizationCompleteActivity"/>        
     </application>
 
 </manifest>

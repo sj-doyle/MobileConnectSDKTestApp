@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="custom_rules">
+        <target name="-post-compile">
+		<jar destfile="bin/gsma-sdk-complete.jar" basedir="bin/classes">
+        		<exclude name="com/gsma/android/mobileconnectsdktest"/>
+        		<exclude name="com/gsma/android/mobileconnectsdktest/**/*"/>
+        		<exclude name="com/gsma/android/xoperatorapidemo"/>
+        		<exclude name="com/gsma/android/xoperatorapidemo/**/*"/>
+		</jar>
+        </target>
+</project>
+

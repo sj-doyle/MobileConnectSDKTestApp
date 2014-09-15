@@ -1,5 +1,7 @@
 package com.gsma.android.xoperatorapidemo.activity;
 
+import java.util.UUID;
+
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -22,13 +24,19 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.android.mobileconnect.authorization.Authorization;
+import com.gsma.android.mobileconnect.authorization.AuthorizationListener;
+import com.gsma.android.mobileconnect.authorization.AuthorizationOptions;
+import com.gsma.android.mobileconnect.values.Prompt;
+import com.gsma.android.mobileconnect.values.ResponseType;
 import com.gsma.android.mobileconnectsdktest.R;
 import com.gsma.android.oneapi.discovery.Api;
 import com.gsma.android.oneapi.discovery.DiscoveryItem;
 import com.gsma.android.oneapi.discovery.DiscoveryListener;
 import com.gsma.android.oneapi.discovery.DiscoveryProvider;
 import com.gsma.android.oneapi.discovery.DiscoveryResponse;
-import com.gsma.android.oneapi.logo.LogoCallbackReceiver;
+import com.gsma.android.oneapi.discovery.DiscoveryTestingProvider;
+import com.gsma.android.oneapi.logo.LogoCache;
 import com.gsma.android.oneapi.logo.LogoItem;
 import com.gsma.android.oneapi.logo.LogoItemArray;
 import com.gsma.android.oneapi.logo.LogoListener;
@@ -37,15 +45,12 @@ import com.gsma.android.oneapi.valuesDiscovery.DiscoveryCredentials;
 import com.gsma.android.oneapi.valuesLogo.AspectRatio;
 import com.gsma.android.oneapi.valuesLogo.BgColor;
 import com.gsma.android.oneapi.valuesLogo.Size;
-import com.gsma.android.xoperatorapidemo.activity.identity.DisplayIdentityWebsiteActivity;
 import com.gsma.android.xoperatorapidemo.discovery.DiscoveryStartupSettings;
-import com.gsma.android.xoperatorapidemo.logo.LogoCache;
-import com.gsma.android.xoperatorapidemo.logo.LogoLoaderTask;
 import com.gsma.android.xoperatorapidemo.utils.PhoneState;
 import com.gsma.android.xoperatorapidemo.utils.PhoneUtils;
 import com.gsma.android.xoperatorapidemo.utils.PreferencesUtils;
 
-public class MainActivity extends Activity implements DiscoveryListener, LogoListener {
+public class MainActivity extends Activity implements DiscoveryListener, LogoListener, AuthorizationListener {
 
 	private static final String TAG = "MainActivity";
 
@@ -102,11 +107,12 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 		 * load settings from private local storage
 		 */
 		SettingsActivity.loadSettings(this);
-		
-		//TODO 
+
+		/*
+		 * load logo cache
+		 */
 		LogoCache.loadCache(this);
-		LogoCache.clearCache();
-//		setLogos(LogoLoaderTask.DefaultLogosOperator);
+		setLogos(LogoCache.DefaultLogosOperator);
 		
 		mainActivityInstance = this;
 
@@ -170,18 +176,20 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
             }
 		}).start();
 				
-		Log.d(TAG, "Starting fetch for logos");
+		Log.d(TAG, "Starting fetch for default logos");
 		LogoProvider logoProvider=new LogoProvider();
 		logoProvider.getLogo(SettingsActivity.getDeveloperOperator().getLogoEndpoint(), 
 				SettingsActivity.getDeveloperOperator().getAppKey(), 
 				SettingsActivity.getDeveloperOperator().getAppSecret(), 
 				null, /* IP address */ 
+				null, /* MCC */
+				null, /* MNC */
 				Size.SMALL, /* size */ 
 				BgColor.NORMAL, /* colour scheme */
 				AspectRatio.LANDSCAPE, /* aspect ratio */
 				this, /* listener */ 
 				this /* context */);
-		
+				
 	}
 	
 	public void handleLogoUpdate() {
@@ -192,7 +200,7 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 			set=setLogos(operator);
 		}
 		if (!set) {
-			set=setLogos(LogoLoaderTask.DefaultLogosOperator);
+			set=setLogos(LogoCache.DefaultLogosOperator);
 		}
 		if (!set) {
 			startOperatorId.setBackgroundDrawable(null);
@@ -204,7 +212,7 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 	private boolean setLogos(String operator) {
 		boolean set=false;
 		Log.d(TAG, "Trying logos for operator = "+operator);
-		Bitmap operatorIdImage=LogoCache.getBitmap(operator, "operatorid", "en", "small");
+		Bitmap operatorIdImage=LogoCache.getBitmap(operator, "operatorid", "small", "normal", "landscape");
 		
 		if (operatorIdImage!=null) {
 			Drawable d = new BitmapDrawable(operatorIdImage);
@@ -233,7 +241,7 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 		if (!justDiscovered) {
 			startOperatorId.setVisibility(View.INVISIBLE);
 			
-			DiscoveryProvider discoveryProvider=new DiscoveryProvider();
+			DiscoveryTestingProvider discoveryProvider=new DiscoveryTestingProvider();
 			Log.d(TAG, "Checking for cached discovery response");
 			discoveryData=discoveryProvider.getCacheDiscoveryItem(this);
 			if (discoveryData!=null) {
@@ -251,15 +259,20 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 			
 			vMCC.setText(mcc!=null?mcc:getText(R.string.valueUnknown));
 			vMNC.setText(mnc!=null?mnc:getText(R.string.valueUnknown));
-
-			//TODO 
-//			Log.d(TAG, "starting logo API request for current operator logos");
-//			new LogoLoaderTask(mainActivityInstance, 
-//					SettingsActivity.getDeveloperOperator().getLogoEndpoint(),
-//					SettingsActivity.getDeveloperOperator().getAppKey(), 
-//					SettingsActivity.getDeveloperOperator().getAppSecret(),
-//					mcc, mnc, SettingsActivity.isCookiesSelected(), 
-//					SettingsActivity.getServingOperator().getIpaddress(), "small").execute();
+			
+			Log.d(TAG, "starting logo API request for current operator logos");
+			LogoProvider logoProvider=new LogoProvider();
+			logoProvider.getLogo(SettingsActivity.getDeveloperOperator().getLogoEndpoint(), 
+					SettingsActivity.getDeveloperOperator().getAppKey(), 
+					SettingsActivity.getDeveloperOperator().getAppSecret(), 
+					null, /* IP address */ 
+					mcc,
+					mnc,
+					Size.SMALL, /* size */ 
+					BgColor.NORMAL, /* colour scheme */
+					AspectRatio.LANDSCAPE, /* aspect ratio */
+					this, /* listener */ 
+					this /* context */);
 			
 			DiscoveryStartupSettings startupOption=SettingsActivity.getDiscoveryStartupSettings();
 			if (startupOption==DiscoveryStartupSettings.STARTUP_OPTION_PASSIVE) {
@@ -281,9 +294,6 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 								this, /* context */
 								DiscoveryCredentials.PLAIN, 
 								"http://gsma.com/oneapi");
-
-						//TODO - no MSISDN parameter
-						
 					} else {
 						discoveryProvider.getDiscoveryPassive(SettingsActivity.getDeveloperOperator().getEndpoint(), 
 								SettingsActivity.getDeveloperOperator().getAppKey(), 
@@ -296,7 +306,6 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 								this, /* context */
 								DiscoveryCredentials.PLAIN, 
 								"http://gsma.com/oneapi");
-						
 					}
 					
 				}
@@ -304,8 +313,6 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 				if (!cacheGood) {
 					discoveryButton.setEnabled(false);
 					vDiscoveryStatus.setText(getString(R.string.discoveryStatusStarted));
-					
-					DiscoveryProcessor listener=new DiscoveryProcessor();
 					
 					Log.d(TAG, "Initiating active discovery");
 					
@@ -321,7 +328,6 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 								this, /* context */
 								DiscoveryCredentials.PLAIN, 
 								"http://gsma.com/oneapi");
-						//TODO - missing MSISDN parameter
 					} else {
 						discoveryProvider.getDiscoveryActive(SettingsActivity.getDeveloperOperator().getEndpoint(), 
 								SettingsActivity.getDeveloperOperator().getAppKey(), 
@@ -340,19 +346,24 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 			}
 
 		} else {
-			//TODO
-//			justDiscovered=false;
-//			
-//			String mcc=SettingsActivity.getMcc();
-//			String mnc=SettingsActivity.getMnc();
-//
-//			Log.d(TAG, "starting logo API request for current operator logos");
-//			new LogoLoaderTask(mainActivityInstance, 
-//					SettingsActivity.getDeveloperOperator().getLogoEndpoint(),
-//					SettingsActivity.getDeveloperOperator().getAppKey(), 
-//					SettingsActivity.getDeveloperOperator().getAppSecret(),
-//					mcc, mnc, SettingsActivity.isCookiesSelected(), 
-//					SettingsActivity.getServingOperator().getIpaddress(), "small").execute();
+
+			String mcc=SettingsActivity.getMcc();
+			String mnc=SettingsActivity.getMnc();
+
+			Log.d(TAG, "starting logo API request for current operator logos");
+			LogoProvider logoProvider=new LogoProvider();
+			logoProvider.getLogo(SettingsActivity.getDeveloperOperator().getLogoEndpoint(), 
+					SettingsActivity.getDeveloperOperator().getAppKey(), 
+					SettingsActivity.getDeveloperOperator().getAppSecret(), 
+					null, /* IP address */
+					mcc,
+					mnc,
+					Size.SMALL, /* size */ 
+					BgColor.NORMAL, /* colour scheme */
+					AspectRatio.LANDSCAPE, /* aspect ratio */
+					this, /* listener */ 
+					this /* context */);
+			
 		}
 	}
 
@@ -454,7 +465,7 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 			discoveryButton.setEnabled(false);
 			vDiscoveryStatus.setText(getString(R.string.discoveryStatusStarted));
 			
-			DiscoveryProvider discoveryProvider=new DiscoveryProvider();
+			DiscoveryTestingProvider discoveryProvider=new DiscoveryTestingProvider();
 			
 			if (SettingsActivity.getServingOperator().isAutomatic()) {
 				discoveryProvider.getDiscoveryActiveAutomaticMCCMNC(SettingsActivity.getDeveloperOperator().getEndpoint(), 
@@ -466,14 +477,13 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 						this, /* context */
 						DiscoveryCredentials.PLAIN, 
 						"http://gsma.com/oneapi");
-				//TODO - missing MSISDN parameter
 			} else {
 				discoveryProvider.getDiscoveryActive(SettingsActivity.getDeveloperOperator().getEndpoint(), 
 						SettingsActivity.getDeveloperOperator().getAppKey(), 
 						SettingsActivity.getDeveloperOperator().getAppSecret(), 
 						SettingsActivity.getServingOperator().getIpaddress(), 
-						SettingsActivity.getServingOperator().getMcc(),
-						SettingsActivity.getServingOperator().getMnc(),
+						mcc,
+						mnc,
 						null, /* MSISDN */
 						this, /* listener */
 						this, /* context */
@@ -492,18 +502,25 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 		
 		String returnUri=PreferencesUtils.getPreference("OpenIDConnectReturnUri");
 		
-		Intent intent = new Intent(
-				this,
-				DisplayIdentityWebsiteActivity.class);
-		intent.putExtra("authUri", operatoridEndpoint.getHref("authorization"));
-		intent.putExtra("tokenUri", operatoridEndpoint.getHref("token"));
-		intent.putExtra("userinfoUri", operatoridEndpoint.getHref("userinfo"));
-		intent.putExtra("clientId", discoveryData.getResponse().getClient_id());
-		intent.putExtra("clientSecret", discoveryData.getResponse().getClient_secret());
-		intent.putExtra("scopes", openIDConnectScopes);
-		intent.putExtra("returnUri", returnUri);
+		String authUri=operatoridEndpoint.getHref("authorization");
+		String clientId=discoveryData.getResponse().getClient_id();
+		String clientSecret=discoveryData.getResponse().getClient_secret();
+		String state=UUID.randomUUID().toString();	
+		String nonce=UUID.randomUUID().toString();	
+		int maxAge=3600;
+		String acrValues="PCR";
 		
-		startActivity(intent);
+		Authorization authorization=new Authorization();
+		
+		AuthorizationOptions authorizationOptions=new AuthorizationOptions();
+		authorizationOptions.setClaimsLocales("en");
+		authorizationOptions.setUILocales("en");
+		authorizationOptions.setLoginHint("+44");
+		
+		Log.d(TAG, "Starting OpenIDConnect authorization");
+		authorization.authorize(authUri, ResponseType.CODE, clientId, clientSecret, openIDConnectScopes, returnUri, state, nonce, Prompt.LOGIN, 
+								maxAge, acrValues, authorizationOptions, this /* listener */, this /* activity */);
+		
 	}
 
 	public static void processLogoUpdates() {
@@ -515,19 +532,15 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 	
 	@Override
 	public void discoveryInfo(DiscoveryItem di) {
-		// TODO Auto-generated method stub
 		Log.d(TAG, "received discoveryInfo");
 		if (di.getResponse()!=null) {
-			Log.d(TAG, "have response");
-			
-			Log.d(TAG, "Updating discovery data");
+			Log.d(TAG, "updating discovery data");
 			discoveryData=di;
 			justDiscovered=true;
 			Message msg=new Message();
 			msg.what=R.string.discoveryStatusCompleted;
 			msg.obj=discoveryData;
 			discoveryHandler.sendMessage(msg);
-			
 		}
 		if (di.getError()!=null) {
 			Log.d(TAG, "have error");
@@ -540,7 +553,6 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 		// TODO Auto-generated method stub
 		
 		Log.d(TAG, "received error");
-		
 	}
 
 	@Override
@@ -559,6 +571,39 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 			}
 		}
 		
+	}
+
+	@Override
+	public void authorizationCodeResponse(String state, String authorizationCode, String error, String clientId, String clientSecret, String scopes, String returnUri) {
+		Log.d(TAG, "Have auth code "+authorizationCode);
+		
+		Api operatoridEndpoint=discoveryData.getResponse()!=null?discoveryData.getResponse().getApi("operatorid"):null;
+		String authUri=operatoridEndpoint.getHref("authorization");
+		String tokenUri=operatoridEndpoint.getHref("token");
+		String userinfoUri=operatoridEndpoint.getHref("userinfo");
+		
+		Intent intent = new Intent(
+				mainActivityInstance,
+				AuthorizationCompleteActivity.class);
+		intent.putExtra("state", state);
+		intent.putExtra("code", authorizationCode);
+		intent.putExtra("error", error);
+		intent.putExtra("authUri", authUri);
+		intent.putExtra("tokenUri", tokenUri);
+		intent.putExtra("userinfoUri", userinfoUri);
+		intent.putExtra("clientId", clientId);
+		intent.putExtra("clientSecret", clientSecret);
+		intent.putExtra("scopes", scopes);
+		intent.putExtra("returnUri", returnUri);
+		
+		startActivity(intent);
+	}
+
+	@Override
+	public void authorizationError(String reason) {
+		// TODO Auto-generated method stub
+		Log.d(TAG, "Have error "+reason);
+		displayError(reason, reason);
 	}
 
 

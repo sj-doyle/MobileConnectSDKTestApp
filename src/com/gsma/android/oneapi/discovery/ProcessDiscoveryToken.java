@@ -11,8 +11,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONObject;
 
-import com.gsma.android.oneapi.utilsDiscovery.HttpUtils;
-import com.gsma.android.oneapi.utilsDiscovery.JsonUtils;
+import com.gsma.android.utils.HttpUtils;
+import com.gsma.android.utils.JsonUtils;
 
 import android.util.Log;
 

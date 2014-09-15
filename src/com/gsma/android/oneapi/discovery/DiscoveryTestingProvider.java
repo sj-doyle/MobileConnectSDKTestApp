@@ -24,7 +24,7 @@ import android.net.Uri;
 /**
  * Main class with library methods. Implements DiscoveryCallbackReciever
  */
-public class DiscoveryProvider implements DiscoveryCallbackReceiver {
+public class DiscoveryTestingProvider implements DiscoveryCallbackReceiver {
 
 	DiscoveryTask initialDiscoveryTask;
 	DiscoveryListener listener;
@@ -34,7 +34,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 	/**
 	 * Constructor
 	 */
-	public DiscoveryProvider() {
+	public DiscoveryTestingProvider() {
 	}
 	
 	/**
@@ -43,6 +43,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 	 * @param serviceUri
 	 * @param consumerKey
 	 * @param consumerSecret
+	 * @param sourceIP
 	 * @param listener It is necessary to implement discoveryInfo(DiscoveryItem di) 
 	 * and errorDiscoveryInfo(JSONObject jo) to manage the response
 	 * @param context
@@ -52,7 +53,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 	 * @throws NullPointerException
 	 */
 	public void getDiscoveryPassiveAutomaticMCCMNC(String serviceUri, String consumerKey,
-			String consumerSecret, String msisdn, DiscoveryListener listener,
+			String consumerSecret, String sourceIP, String msisdn, DiscoveryListener listener,
 			Context context, DiscoveryCredentials credentials, String redirectUri) {
 		try {
 			this.listener = listener;
@@ -70,7 +71,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 			String mnc = phoneS.getMnc();
 			
 			initialDiscoveryTask = new DiscoveryTask(serviceUri, consumerKey,
-						consumerSecret, null /* sourceIP */, usingMobileData, msisdn, mcc,
+						consumerSecret, sourceIP, usingMobileData, msisdn, mcc,
 						mnc, this, credentials.value(), redirectUri, context, false);
 			initialDiscoveryTask.execute();
 		} catch (NullPointerException e) {
@@ -80,13 +81,13 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 		}
 	}
 	
-
 	/**
 	 * Gets the discovery information in passive mode. 
 	 * 
 	 * @param serviceUri
 	 * @param consumerKey
 	 * @param consumerSecret
+	 * @param sourceIP
 	 * @param mcc
 	 * @param mnc
 	 * @param msisdn
@@ -99,7 +100,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 	 * @throws NullPointerException
 	 */
 	public void getDiscoveryPassive(String serviceUri, String consumerKey,
-			String consumerSecret, String mcc, String mnc, String msisdn, DiscoveryListener listener,
+			String consumerSecret, String sourceIP, String mcc, String mnc, String msisdn, DiscoveryListener listener,
 			Context context, DiscoveryCredentials credentials, String redirectUri) {
 		try {
 			this.listener = listener;
@@ -114,7 +115,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 			boolean usingMobileData = phoneS.isUsingMobileData();
 			
 			initialDiscoveryTask = new DiscoveryTask(serviceUri, consumerKey,
-						consumerSecret, null /* sourceIP */, usingMobileData, msisdn, mcc,
+						consumerSecret, sourceIP, usingMobileData, msisdn, mcc,
 						mnc, this, credentials.value(), redirectUri, context, false);
 			initialDiscoveryTask.execute();
 		} catch (NullPointerException e) {
@@ -130,6 +131,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 	 * @param serviceUri
 	 * @param consumerKey
 	 * @param consumerSecret
+	 * @param sourceIP
 	 * @param listener. It is necessary to implement discoveryInfo(DiscoveryItem di) 
 	 * and errorDiscoveryInfo(JSONObject jo) to manage the response
 	 * @param context
@@ -139,7 +141,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 	 * @throws NullPointerException
 	 */
 	public void getDiscoveryActiveAutomaticMCCMNC(String serviceUri, String consumerKey,
-			String consumerSecret, String msisdn, DiscoveryListener listener,
+			String consumerSecret, String sourceIP, String msisdn, DiscoveryListener listener,
 			Context context, DiscoveryCredentials credentials, String redirectUri) {
 		try {
 			this.listener = listener;
@@ -157,7 +159,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 			String mnc = phoneS.getMnc();
 	
 			initialDiscoveryTask = new DiscoveryTask(serviceUri, consumerKey,
-						consumerSecret, null /* sourceIP */, usingMobileData, msisdn, mcc,
+						consumerSecret, sourceIP, usingMobileData, msisdn, mcc,
 						mnc, this, credentials.value(),redirectUri, context, true);
 			initialDiscoveryTask.execute();
 		} catch (NullPointerException e) {
@@ -173,6 +175,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 	 * @param serviceUri
 	 * @param consumerKey
 	 * @param consumerSecret
+	 * @param sourceIP
 	 * @param mcc
 	 * @param mnc
 	 * @param msisdn
@@ -185,7 +188,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 	 * @throws NullPointerException
 	 */
 	public void getDiscoveryActive(String serviceUri, String consumerKey,
-			String consumerSecret, String mcc, String mnc, String msisdn, DiscoveryListener listener,
+			String consumerSecret, String sourceIP, String mcc, String mnc, String msisdn, DiscoveryListener listener,
 			Context context, DiscoveryCredentials credentials, String redirectUri) {
 		try {
 			this.listener = listener;
@@ -200,7 +203,7 @@ public class DiscoveryProvider implements DiscoveryCallbackReceiver {
 			boolean usingMobileData = phoneS.isUsingMobileData();
 	
 			initialDiscoveryTask = new DiscoveryTask(serviceUri, consumerKey,
-						consumerSecret, null /* sourceIP */, usingMobileData, msisdn, mcc,
+						consumerSecret, sourceIP, usingMobileData, msisdn, mcc,
 						mnc, this, credentials.value(),redirectUri, context, true);
 			initialDiscoveryTask.execute();
 		} catch (NullPointerException e) {

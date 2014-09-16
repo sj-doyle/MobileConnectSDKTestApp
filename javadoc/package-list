@@ -1,0 +1,12 @@
+com.gsma.android.mobileconnect.authorization
+com.gsma.android.mobileconnect.token
+com.gsma.android.mobileconnect.userinfo
+com.gsma.android.mobileconnect.values
+com.gsma.android.oneapi.discovery
+com.gsma.android.oneapi.logo
+com.gsma.android.oneapi.valuesDiscovery
+com.gsma.android.oneapi.valuesLogo
+com.gsma.android.utils
+com.gsma.android.xoperatorapidemo.activity
+com.gsma.android.xoperatorapidemo.discovery
+com.gsma.android.xoperatorapidemo.utils

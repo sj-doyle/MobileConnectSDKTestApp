@@ -14,6 +14,7 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 
 import com.gsma.android.mobileconnectsdktest.R;
+import com.gsma.android.oneapi.logo.LogoCache;
 import com.gsma.android.xoperatorapidemo.discovery.DeveloperOperatorSetting;
 import com.gsma.android.xoperatorapidemo.discovery.DiscoveryDeveloperOperatorSettings;
 import com.gsma.android.xoperatorapidemo.discovery.DiscoveryServingOperatorSettings;
@@ -194,7 +195,8 @@ public class SettingsActivity extends Activity {
 	public void updateServingOperator(int index) {
     	servingOperatorIndex=index;
     	servingOperator=DiscoveryServingOperatorSettings.getOperator(index);
-		Log.d(TAG, "Selected serving operator "+index+" "+servingOperator.getName());
+		Log.d(TAG, "Selected serving operator "+index+" "+servingOperator.getName()+
+				" auto="+servingOperator.isAutomatic()+" mcc="+servingOperator.getMcc()+" mnc="+servingOperator.getMnc());
 		SharedPreferences.Editor editor = mPrefs.edit();
 	    editor.putInt("ServingOperator", index);
 	    editor.commit();
@@ -249,7 +251,7 @@ public class SettingsActivity extends Activity {
 	
 	public void clearCache(View view) {
 		MainActivity.clearDiscoveryData();
-//		LogoCache.clearCache();
+		LogoCache.clearCache();
 		MainActivity.processLogoUpdates();
 	}
 	

@@ -11,6 +11,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.message.BasicNameValuePair;
@@ -78,8 +79,8 @@ public class RetrieveTokenTask extends AsyncTask<Void, Void, JSONObject> {
 		else
 			infoParams = new BasicNameValuePair("access_token", infoType);
 //		BasicNameValuePair codeParams = new BasicNameValuePair("code", code);
-		BasicNameValuePair clientIdParams = new BasicNameValuePair("client_id",
-				clientId);
+//		BasicNameValuePair clientIdParams = new BasicNameValuePair("client_id",
+//				clientId);
 		BasicNameValuePair grantTypeParams;
 		if(type.equals("token"))
 			grantTypeParams = new BasicNameValuePair("grant_type", "authorization_code");
@@ -94,17 +95,17 @@ public class RetrieveTokenTask extends AsyncTask<Void, Void, JSONObject> {
 		if(type.equals("refresh"))
 			scopeParams = new BasicNameValuePair("scope", scope);
 		postparams.add(infoParams);
-		postparams.add(clientIdParams);
+//		postparams.add(clientIdParams);
 		postparams.add(grantTypeParams);
 		if(redirectUriParams!=null)
 			postparams.add(redirectUriParams);
 		if(scopeParams!=null)
 			postparams.add(scopeParams);
-		if (clientSecret != null && clientSecret.trim().length() > 0) {
-			BasicNameValuePair clientSecretParams = new BasicNameValuePair(
-					"client_secret", clientSecret);
-			postparams.add(clientSecretParams);
-		}
+//		if (clientSecret != null && clientSecret.trim().length() > 0) {
+//			BasicNameValuePair clientSecretParams = new BasicNameValuePair(
+//					"client_secret", clientSecret);
+//			postparams.add(clientSecretParams);
+//		}
 
 		/* add the post parameters as the request body */
 		try {
@@ -117,7 +118,7 @@ public class RetrieveTokenTask extends AsyncTask<Void, Void, JSONObject> {
 		httpRequest.addHeader("Content-Type",
 				"application/x-www-form-urlencoded");
 
-		HttpClient httpClient = HttpUtils.getHttpClient();
+		HttpClient httpClient = HttpUtils.getHttpAuthorizationClient(tokenUri, clientId, clientSecret, "plain", httpRequest);
 		HttpParams httpParams = httpRequest.getParams();
 		httpParams.setParameter(ClientPNames.HANDLE_REDIRECTS, Boolean.FALSE);
 		httpRequest.setParams(httpParams);

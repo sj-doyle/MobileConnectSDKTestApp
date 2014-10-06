@@ -162,7 +162,7 @@ public class DiscoveryTask extends AsyncTask<Void, Void, JSONObject> {
 			registry.register(new Scheme("https", socketFactory, 443));
 			HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
 
-			HttpClient httpClient = HttpUtils.getHttpClient(phase1Uri, consumerKey, consumerSecret, credentials, httpRequest);
+			HttpClient httpClient = HttpUtils.getHttpAuthorizationClient(phase1Uri, consumerKey, consumerSecret, credentials, httpRequest);
 			HttpParams httpParams = httpRequest.getParams();
 			httpParams.setParameter(ClientPNames.HANDLE_REDIRECTS,Boolean.FALSE);
 			httpRequest.setParams(httpParams);

@@ -24,7 +24,7 @@ import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.impl.auth.BasicScheme;
@@ -111,7 +111,7 @@ public class HttpUtils {
 	 * @return HttpClient
 	 */
 	public static HttpClient getHttpClient(String serviceUri, String consumerKey) {
-		return getHttpClient(serviceUri, consumerKey, null, "plain", null);
+		return getHttpAuthorizationClient(serviceUri, consumerKey, null, "plain", null);
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class HttpUtils {
 	 * @throws NoSuchAlgorithmException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static HttpClient getHttpClient(String serviceUri,String consumerKey, String consumerSecret, String credentials,HttpGet httpRequest) {
+	public static HttpClient getHttpAuthorizationClient(String serviceUri,String consumerKey, String consumerSecret, String credentials, HttpRequestBase httpRequest) {
 		HttpClient httpClient = new DefaultHttpClient();
 
 		HttpParams httpParams = httpClient.getParams();

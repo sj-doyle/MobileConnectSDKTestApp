@@ -246,31 +246,36 @@ public class LogoCache {
 					Log.d(TAG, "lastModified = " + lastModified);
 					InputStream in = urlC.getInputStream();
 					Bitmap logoBitmap = BitmapFactory.decodeStream(in);
+					
+					if (logoBitmap!=null) {
 
-					File directory = contextWrapper.getDir(filepath,Context.MODE_PRIVATE);
-					MessageDigest digest = null;
-					digest = MessageDigest.getInstance("SHA-256");
-					digest.reset();
-					String localFilename = HttpUtils.bin2hex(digest.digest(logoResponse.getUrl().getBytes("UTF-8"))) + ".png";
-					Log.d(TAG, "Local file name=" + localFilename);
-
-					File localImageFile = new File(directory, localFilename);
-					FileOutputStream fos = new FileOutputStream(localImageFile);
-					logoBitmap.compress(CompressFormat.PNG, 100, fos);
-					fos.close();
-					Log.d(TAG, "Written to=" + localImageFile.getAbsolutePath());
-
-					lci.setETag(eTag);
-					lci.setLastModified(lastModified);
-					lci.setLocalFile(localImageFile.getAbsolutePath());
-					lci.setImageFile(logoBitmap);
-					lci.setLastModifiedTimestamp(urlC.getLastModified());
-
-					Log.d(TAG, "Storing to cache");
-					logoCache.add(lci);
-					logoQuickCache.put(logoResponse.getUrl(), lci);
-
-					save();
+						File directory = contextWrapper.getDir(filepath,Context.MODE_PRIVATE);
+						MessageDigest digest = null;
+						digest = MessageDigest.getInstance("SHA-256");
+						digest.reset();
+						String localFilename = HttpUtils.bin2hex(digest.digest(logoResponse.getUrl().getBytes("UTF-8"))) + ".png";
+						Log.d(TAG, "Local file name=" + localFilename);
+	
+						File localImageFile = new File(directory, localFilename);
+						FileOutputStream fos = new FileOutputStream(localImageFile);
+						logoBitmap.compress(CompressFormat.PNG, 100, fos);
+						fos.close();
+						Log.d(TAG, "Written to=" + localImageFile.getAbsolutePath());
+	
+						lci.setETag(eTag);
+						lci.setLastModified(lastModified);
+						lci.setLocalFile(localImageFile.getAbsolutePath());
+						lci.setImageFile(logoBitmap);
+						lci.setLastModifiedTimestamp(urlC.getLastModified());
+	
+						Log.d(TAG, "Storing to cache");
+						logoCache.add(lci);
+						logoQuickCache.put(logoResponse.getUrl(), lci);
+	
+						save();
+					} else {
+						Log.w(TAG, "Logo not found at "+logoResponse.getUrl());
+					}
 
 				} catch (MalformedURLException e) {
 					e.printStackTrace();

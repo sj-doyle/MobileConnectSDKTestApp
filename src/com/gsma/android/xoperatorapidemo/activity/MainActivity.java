@@ -35,7 +35,7 @@ import com.gsma.android.oneapi.discovery.DiscoveryItem;
 import com.gsma.android.oneapi.discovery.DiscoveryListener;
 import com.gsma.android.oneapi.discovery.DiscoveryProvider;
 import com.gsma.android.oneapi.discovery.DiscoveryResponse;
-import com.gsma.android.oneapi.discovery.DiscoveryTestingProvider;
+import com.gsma.android.oneapi.discovery.DiscoveryProvider;
 import com.gsma.android.oneapi.logo.LogoCache;
 import com.gsma.android.oneapi.logo.LogoItem;
 import com.gsma.android.oneapi.logo.LogoItemArray;
@@ -112,7 +112,7 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 		 * load logo cache
 		 */
 		LogoCache.loadCache(this);
-		setLogos(LogoCache.DefaultLogosOperator);
+		setLogos("exchange");
 		
 		mainActivityInstance = this;
 
@@ -200,7 +200,7 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 			set=setLogos(operator);
 		}
 		if (!set) {
-			set=setLogos(LogoCache.DefaultLogosOperator);
+			set=setLogos("exchange");
 		}
 		if (!set) {
 			startOperatorId.setBackgroundDrawable(null);
@@ -241,7 +241,7 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 		if (!justDiscovered) {
 			startOperatorId.setVisibility(View.INVISIBLE);
 			
-			DiscoveryTestingProvider discoveryProvider=new DiscoveryTestingProvider();
+			DiscoveryProvider discoveryProvider=new DiscoveryProvider();
 			Log.d(TAG, "Checking for cached discovery response");
 			discoveryData=discoveryProvider.getCacheDiscoveryItem(this);
 			if (discoveryData!=null) {
@@ -465,7 +465,7 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 			discoveryButton.setEnabled(false);
 			vDiscoveryStatus.setText(getString(R.string.discoveryStatusStarted));
 			
-			DiscoveryTestingProvider discoveryProvider=new DiscoveryTestingProvider();
+			DiscoveryProvider discoveryProvider=new DiscoveryProvider();
 			
 			if (SettingsActivity.getServingOperator().isAutomatic()) {
 				discoveryProvider.getDiscoveryActiveAutomaticMCCMNC(SettingsActivity.getDeveloperOperator().getEndpoint(), 

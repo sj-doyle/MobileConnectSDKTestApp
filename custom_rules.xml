@@ -8,7 +8,7 @@
 	        </delete>
 	    </target> 
 	
-        <target name="-post-compile">
+        <!--<target name="-post-compile">
 			<jar destfile="bin/gsma-sdk-complete.jar" basedir="bin/classes">
 	        		<exclude name="com/gsma/android/mobileconnectsdktest"/>
 	        		<exclude name="com/gsma/android/mobileconnectsdktest/**/*"/>
@@ -51,6 +51,6 @@
 		        <jar destfile="bin/gsma-sdk-javadoc.jar" basedir="javadoc">
                         </jar>
 
-        </target>
+        </target>-->
 </project>
 

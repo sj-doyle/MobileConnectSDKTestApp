@@ -552,25 +552,25 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 	public void errorDiscoveryInfo(JSONObject error) {
 		// TODO Auto-generated method stub
 		
-		Log.d(TAG, "received error");
+		Log.d(TAG, "received discovery error"+error);
 	}
 
 	@Override
-	public void errorLogoInfo(JSONObject arg0) {
+	public void errorLogoInfo(JSONObject error) {
 		// TODO Auto-generated method stub
-		
+		Log.d(TAG, "received logo error "+error);
 	}
 
 	@Override
 	public void logoInfo(LogoItemArray logoItems) {
 		// TODO Auto-generated method stub
-		Log.d(TAG, "received logo data");
+		Log.d(TAG, "received logo data "+logoItems);
 		if (logoItems!=null) {
 			for (LogoItem logoItem:logoItems.getLogos()) {
 				Log.d(TAG, "Logo "+logoItem.getUrl());
 			}
 		}
-		
+		processLogoUpdates();
 	}
 
 	@Override

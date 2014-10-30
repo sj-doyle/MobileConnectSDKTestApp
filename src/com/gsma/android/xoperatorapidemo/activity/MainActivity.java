@@ -508,7 +508,7 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 		String state=UUID.randomUUID().toString();	
 		String nonce=UUID.randomUUID().toString();	
 		int maxAge=3600;
-		String acrValues="PCR";
+		String acrValues="2";
 		
 		Authorization authorization=new Authorization();
 		
@@ -516,9 +516,15 @@ public class MainActivity extends Activity implements DiscoveryListener, LogoLis
 		authorizationOptions.setClaimsLocales("en");
 		authorizationOptions.setUILocales("en");
 		authorizationOptions.setLoginHint("+44");
+
+		Prompt prompt=Prompt.LOGIN;
+
+		maxAge=0;
+		prompt=Prompt.NONE;
+		authorizationOptions.setUILocales("");
 		
 		Log.d(TAG, "Starting OpenIDConnect authorization");
-		authorization.authorize(authUri, ResponseType.CODE, clientId, clientSecret, openIDConnectScopes, returnUri, state, nonce, Prompt.LOGIN, 
+		authorization.authorize(authUri, ResponseType.CODE, clientId, clientSecret, openIDConnectScopes, returnUri, state, nonce, prompt, 
 								maxAge, acrValues, authorizationOptions, this /* listener */, this /* activity */);
 		
 	}
